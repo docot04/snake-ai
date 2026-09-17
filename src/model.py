@@ -1,3 +1,6 @@
+from agent import Agent
+from env import SnakeEnv
+
 agent=Agent()
 env=SnakeEnv()
 
