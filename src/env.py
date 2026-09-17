@@ -1,13 +1,18 @@
 import subprocess
 
+# actions chosen by DQN directly
 ACTION_STRAIGHT = 0
 ACTION_LEFT = 1
 ACTION_RIGHT = 2
+
+# control commands used by python environment
 ACTION_RESET = 3
 ACTION_QUIT = 4
 
+# Python <-> C communication interface
 class SnakeEnv:
 
+    # C environment is run as a child process 
     def __init__(self):
         self.process = subprocess.Popen(
             ["./snake"],
@@ -20,8 +25,13 @@ class SnakeEnv:
         observation = self._read_observation()
         if observation is None:
             raise RuntimeError("Failed to start C-environment")
+
+        # store initial environment state
         self.state, self.reward, self.score, self.done = observation
 
+    # read one observation from C environment
+    # format: OK <states[0]...state[10]> <reward float> <score> <done>\\n
+    # return: (state, reward, score, done?)
     def _read_observation(self):
         line = self.process.stdout.readline()
         if not line:
@@ -37,10 +47,13 @@ class SnakeEnv:
         done = bool(int(values[13]))
         return state, reward, score, done
 
+    # send an action to C environment
+    # format: <action>\\n
     def _send_action(self, action):
         self.process.stdin.write(f"{action}\n")
         self.process.stdin.flush()
 
+    # reset the game and return to new initial state
     def reset(self):
         self._send_action(ACTION_RESET)
         observation = self._read_observation()
@@ -49,6 +62,9 @@ class SnakeEnv:
         self.state, self.reward, self.score, self.done = observation
         return self.state
 
+    # perform one action in C environment
+    # actions: 0 (straight) 1 (left), 2 (right)
+    # returns: state, reward, done, score
     def step(self, action):
         self._send_action(action)
         observation = self._read_observation()
@@ -61,6 +77,7 @@ class SnakeEnv:
         self.done = done
         return state, reward, done, score
 
+    # exit C environment
     def close(self):
         try:
             self._send_action(ACTION_QUIT)
