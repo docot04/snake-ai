@@ -49,7 +49,7 @@ class Agent:
         self.state_size=11       # danger(S,L,R) food(U,D,L,R) direction(U,D,L,R)
         self.action_size=3       # (S,L,R)
         self.gamma=0.99          # discount factor
-        self.epsilon=1           # probability of exploration 
+        self.epsilon=1.0           # probability of exploration 
         self.epsilon_min=0.05    # min amount of exploration
         self.epsilon_decay=0.995 # reduction factor of episilon per iteration
         self.batch_size=64       # number of experiences used per training update
@@ -94,14 +94,21 @@ class Agent:
     def update_target(self):
         self.target_model.load_state_dict(self.model.state_dict())
 
+    # trade exploration for exploitation
+    def decay_epsilon(self):
+        if self.epsilon > self.epsilon_min:
+            self.epsilon *= self.epsilon_decay
+            self.epsilon = max(self.epsilon, self.epsilon_min)
+
     # save trained model's weights
     def save(self, path):
         torch.save(self.model.state_dict(), path)
 
     # load model weights on both main and target network
     def load(self, path):
-        self.model.load_state_dict(torch.load(path)) 
-        self.target_model.load_state_dict(self.model.state_dict())
+        state_dict = torch.load(path, map_location=self.device)
+        self.model.load_state_dict(state_dict) 
+        self.target_model.load_state_dict(state_dict)
 
     # perform one DQN train step using a random batch from replay buffer
     def train(self):
@@ -152,7 +159,3 @@ class Agent:
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
-
-        # trade exploration for exploitation (epsilon decay)
-        if self.epsilon>self.epsilon_min:
-            self.epsilon=self.epsilon * self.epsilon_decay
