@@ -13,11 +13,19 @@ def training():
 
         while not done:
             action=agent.choose_action(state)
-            next_state, reward, done=env.step(action)
+            next_state, reward, done, score=env.step(action)
             agent.remember(state, action, reward, next_state, done)
             agent.train()
             state=next_state
             total_reward+=reward
 
         agent.update_target()
+
+        if agent.epsilon>agent.epsilon_min:
+            agent_epsilon*=agent.epsilon_decay
+
+        print(f"Round: {round+1}, "
+              f"Score: {score}, "
+              f"Reward: {total_reward:.2f}, "
+              f"Epsilon: {agent.epsilon: .3f}")    
 
