@@ -56,21 +56,29 @@ python main.py test model.pth 0.1
 
 ## Reinforcement Learning
 
-### State Representation
+### 1. State Representation
 
 The agent receives the following **11 binary element state vector**, to be used as the observation for RL model:
 
 [`danger_straight`, `danger_left`, `danger_right`, `food_up`, `food_down`, `food_left`, `food_right`, `direction_up`, `direction_down`, `direction_left`, `direction_right`]
 
-### Action Space
+### 2. Action Space
 
 The agent can choose between **3 actions**: `0` (straight), `1` (left), `2` (right), which are relative to the snake's current direction to allow the same action representation to work regardless of the snake's current orientation.
 
-### Neural Network
+### 3. Reward Function
+
+The Rewards are managed by the C-environment and sent with each state update
+
+- **Eat food** : `+5.0`
+- **Normal Movement** : `-0.01` (encourages the agent to make progress rather than endlessly moving without eating food)
+- **Death** : `-10.0`
+
+### 4. Neural Network
 
 The agent uses a fully connected neural network to approximate the Q function, with these layers: `Input[11]`, `Hidden1[128]`, `Hidden2[128]`, `Output[3]`. During exploitation, the action with the highest Q-value is selected.
 
-### Q-function approximation
+### 5. Q-function approximation
 
 The agent attempts to learn the optimal action-value function using the **Bellman Optimality Equation**:
 
@@ -86,11 +94,11 @@ where:
 - $s'$ is the next state resulting from the action.
 - $a'$ is the next possible action in state $s'$.
 
-### Experience Replay
+### 6. Experience Replay
 
 Every interaction with the environment produces an experience `(state, action, reward, next_state, done)` stored in a replay buffer with a capacity of **100000 experiences**. Instead of training only on the most recent experience, the agent randomly samples a batch of **64 experiences**. This helps reduce correlations between consecutive experiences and allows the agent to learn from previous situations multiple times.
 
-### Target Network
+### 7. Target Network
 
 Two DQN networks are maintained to stabilize the Q-learning updates:
 
@@ -104,13 +112,13 @@ Two DQN networks are maintained to stabilize the Q-learning updates:
    - Not updated every training step
    - Receives a copy of the main network's weights every **10 episodes**
 
-### Epsilon-Greedy Exploration strategy
+### 8. Epsilon-Greedy Exploration strategy
 
 Initially `ε = 1.0` so the agent heavily explores random actions. After every episode `ε = ε * decay` until it reaches the minimum `ε = 0.05`. The policy therefore gradually transitions from **exploration** toward **exploitation**.
 
 During testing, exploration is disabled (`ε = 0`) so the trained agent always selects the action with the highest predicted Q-value.
 
-### Hyperparameters
+### 9. Hyperparameters
 
 ```
 State size        : 11
@@ -131,7 +139,7 @@ Optimizer         : Adam
 Loss function     : MSE
 ```
 
-### Complete Training Loop
+### 10. Complete Training Loop
 
 ```mermaid
 flowchart TD
