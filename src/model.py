@@ -1,7 +1,4 @@
-import time
-import sys
-from agent import Agent
-from env import SnakeEnv
+import time 
 
 MAX_TRAIN_EPISODES = 500
 MAX_TEST_EPISODES = 10
@@ -40,7 +37,7 @@ def training(agent, env, model_path):
     print(f"\nModel saved to: {model_path}")
 
 # testing the DQN
-def testing(agent, env, model_path):
+def testing(agent, env, model_path, delay=0):
 
     agent.load(model_path)
 
@@ -62,7 +59,7 @@ def testing(agent, env, model_path):
                 steps += 1
 
                 # to slow down the visuals
-                # time.sleep(0.1) 
+                time.sleep(delay)
             scores.append(score)
 
             print(
@@ -84,33 +81,3 @@ def testing(agent, env, model_path):
         print(f"Average score:  {average_score:.2f}")
         print(f"Best score:     {max(scores)}")
         print(f"Worst score:    {min(scores)}")
-
-
-def main():
-    if len(sys.argv) != 3:
-        print(
-            "Usage:\n"
-            "  python model.py train <model.pth>\n"
-            "  python model.py test  <model.pth>"
-        )
-        sys.exit(1)
-
-    mode = sys.argv[1]
-    model_path = sys.argv[2]
-    if mode not in ("train", "test"):
-        print("Mode must be either 'train' or 'test'.")
-        sys.exit(1)
-
-    agent = Agent()
-    env = SnakeEnv()
-    try:
-        if mode == "train":
-            training(agent, env, model_path)
-        elif mode == "test":
-            testing(agent, env, model_path)
-    finally:
-        env.close()
-
-
-if __name__ == "__main__":
-    main()

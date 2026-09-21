@@ -13,9 +13,12 @@ ACTION_QUIT = 4
 class SnakeEnv:
 
     # C environment is run as a child process 
-    def __init__(self):
+    def __init__(self, headless=False):
+        command = ["./snake", "interface"]
+        if headless:
+            command.append("--headless")
         self.process = subprocess.Popen(
-            ["./snake"],
+            command,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
