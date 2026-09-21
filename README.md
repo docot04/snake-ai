@@ -31,7 +31,7 @@ To train a new agent (use flag `--headless` to run training loop without renderi
 python main.py train model.pth
 ```
 
-To test a trained model (the final value (delay controls how fast the actions are performed)):
+To test a trained model (the final value (delay) controls how fast the actions are performed):
 
 ```
 python main.py test model.pth 0.1
